@@ -1,0 +1,577 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Pawpal - Donation Detail - No. {{ case.case_id }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* --- General Variables (should match donate.html or be in base) --- */
+    :root {
+        --pawpal-primary: #d55e00;
+        --pawpal-secondary: #8d6e63; /* This is a brown color */
+        --pawpal-green: #8db38b;
+        --pawpal-light-green: #f0f7f0;
+        --pawpal-dark-green-text: #335c3a;
+        --pawpal-light-orange-accent: #ff8c42;
+        --pawpal-background: #f6f6f1; /* Slightly different for detail page */
+        --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+        --border-radius-cute: 20px;
+        --pawpal-cream-background: #f7f3e9; /* Define a cream color, you can adjust this */
+    }
+
+    body {
+        background-color: var(--pawpal-background);
+        font-family: 'Quicksand', sans-serif; /* Ensuring Quicksand */
+        color: #333;
+        line-height: 1.4;
+        padding-bottom: 60px;
+    }
+    .page-header-title {
+        background-color: var(--pawpal-green);
+        color: white;
+        padding: 15px 15px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 700; /* Bolder */
+        font-family: 'Grandstander', cursive;
+        margin-top: 10px; /* Assuming fixed header */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Softer shadow */
+    }
+
+    /* MODIFIED FOR HORIZONTAL LAYOUT */
+    .donate-detail-container {
+        max-width: 960px; /* << ADJUSTED: Increased max-width for side-by-side layout */
+        margin: 20px auto;
+        padding: 10px;
+        display: flex; /* << ADDED: Enable flexbox */
+        justify-content: space-between; /* << ADDED: Distribute space between items */
+        align-items: flex-start; /* << ADDED: Align items to the top */
+        gap: 20px; /* << ADDED: Space between the two cards */
+    }
+
+    /* MODIFIED FOR HORIZONTAL LAYOUT */
+    .pet-detail-card {
+        background-color: #fff8e1;
+        border-radius: var(--border-radius-cute);
+        overflow: hidden;
+        /* margin-bottom: 20px; */ /* << REMOVED: Gap will handle spacing or media query will add back */
+        box-shadow: var(--card-shadow);
+        padding: 20px;
+        flex: 1 1 48%; /* << ADDED: Flex properties (grow, shrink, basis) */
+        min-width: 320px; /* << ADDED: Minimum width before wrapping (if flex-wrap was on parent) or shrinking too much */
+    }
+
+    .pet-info-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #ffe0b2;
+    }
+    .pet-info-header h3 {
+        margin: 0;
+        color: var(--pawpal-secondary);
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .pet-info-header .gender-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #66b0f5;
+        color: #ffffff;
+        font-size: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    .pet-info-header .gender-icon.female { background-color: #ff80ab; }
+
+    .pet-detail-info { display: flex; margin-bottom : 15px; }
+    .pet-image { width: 120px; height: 120px; overflow: hidden; border-radius: 15px; margin-right: 20px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .pet-image img { width: 100%; height: 100%; object-fit: cover; }
+    .pet-details { flex-grow: 1; }
+    .detail-row { display: flex; margin-bottom: 6px; font-size: 14px; }
+    .detail-label { width: 85px; color: var(--pawpal-secondary); font-weight: 600; flex-shrink: 0; }
+    .detail-value { flex-grow: 1; color: #555; }
+
+    .pet-condition { margin-top: 15px; }
+    .condition-label { display: flex; align-items: center; font-size: 15px; font-weight: 600; margin-bottom: 8px; color: var(--pawpal-secondary); }
+    .notebook-icon { margin-right: 8px; color: var(--pawpal-green); font-size: 1.1em; }
+    .pet-condition p { color: #555; font-size: 14px; line-height: 1.5; margin: 0; }
+
+    /* MODIFIED FOR HORIZONTAL LAYOUT */
+    .donation-section {
+        background-color: #fff;
+        border-radius: var(--border-radius-cute);
+        padding: 25px;
+        /* margin-top: 20px; */ /* << REMOVED: Gap will handle spacing or media query will add back */
+        box-shadow: var(--card-shadow);
+        border-top: 4px solid var(--pawpal-green);
+        flex: 1 1 48%; /* << ADDED: Flex properties (grow, shrink, basis) */
+        min-width: 320px; /* << ADDED: Minimum width for the donation form */
+    }
+
+    .section-heading { font-size: 18px; font-weight: 700; margin-bottom: 20px; text-align: center; color: var(--pawpal-green); }
+    .amount-input { display: flex; align-items: center; background-color: #f9f9f9; border-radius: 12px; padding: 12px 15px; border: 2px solid #eee; transition: border-color 0.3s ease; flex-grow: 1; min-width: 120px; }
+    .amount-input:focus-within { border-color: var(--pawpal-light-orange-accent); }
+    .amount-input span { margin-right: 10px; font-size: 18px; font-weight: bold; color: #666; }
+    .amount-input input { border: none; outline: none; width: 100%; background: transparent; font-size: 16px; font-weight: 600; color: #333; font-family: 'Outfit', sans-serif; }
+
+    .payment-options { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; flex-shrink: 0; margin-top:15px; }
+    .payment-option input[type="radio"] { display: none; }
+    .payment-button { display: inline-flex; align-items: center; justify-content: center; border: 2px solid #ddd; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; background-color: #fff; color: #333; white-space: nowrap; padding: 8px 20px; min-height: 50px; min-width: 110px; font-size: 15px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .payment-button.selected { background: linear-gradient(135deg, var(--pawpal-light-orange-accent) 0%, var(--pawpal-primary) 100%); color: white; border-color: var(--pawpal-primary); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(213, 94, 0, 0.25); }
+    .payment-button:hover:not(.selected) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #ccc; }
+    .payment-button.promptpay-label { padding: 0; border: 2px solid #ddd; background-color: #fff; overflow: hidden; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+    .payment-button.promptpay-label img { height: 70px; width: auto; display: block; }
+
+    /* === MINIMAL & CUTE QR CODE CONTAINER STYLES (UPDATED) === */
+    .generated-qr-container {
+        text-align: center;
+        margin: 30px auto;
+        padding: 25px;
+        border-radius: 24px;
+        background-color: #f7f7f2;
+        animation: fadeIn 0.6s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        position: relative;
+        max-width: 280px;
+        border: none;
+    }
+    .generated-qr-container:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(to right, var(--pawpal-green), var(--pawpal-light-orange-accent));
+        border-radius: 24px 24px 0 0;
+        opacity: 0.7;
+    }
+    .generated-qr-container .decorative-paw {
+        position: absolute;
+        font-size: 22px;
+        color: rgba(141, 110, 99, 0.15);
+        z-index: 0;
+    }
+    .generated-qr-container .decorative-paw.top-left { top: 15px; left: 15px; transform: rotate(-20deg); }
+    .generated-qr-container .decorative-paw.bottom-right { bottom: 15px; right: 15px; transform: rotate(20deg); }
+    .generated-qr-container img {
+        width: 180px;
+        height: auto;
+        border: none;
+        padding: 12px;
+        border-radius: 18px;
+        background-color: white;
+        margin: 10px auto;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+        position: relative;
+        z-index: 1;
+        transition: transform 0.3s ease;
+    }
+    .generated-qr-container img:hover { transform: scale(1.02); }
+    .generated-qr-container p { font-weight: 500; margin-top: 12px; font-size: 0.95em; color: var(--pawpal-secondary); position: relative; z-index: 1; }
+    .generated-qr-container p:nth-child(2) { font-size: 0.85em; color: #999; margin-top: 4px; margin-bottom: 15px; }
+    .generated-qr-container .qr-instruction { font-family: 'Varela Round', sans-serif; color: #888; font-size: 0.85em; margin-top: 15px; font-weight: 500; position: relative; z-index: 1; line-height: 1.5; }
+    .generated-qr-container .qr-instruction:before { content: "💌"; display: block; font-size: 16px; margin-bottom: 6px; }
+    #slipUploadSectionCase { margin-top: 20px; animation: fadeIn 0.5s ease; padding-top: 20px; border-top: 1px dashed #e0e0e0; text-align: center; }
+    #slipUploadSectionCase .form-group { margin-bottom: 20px; text-align: center; }
+    #slipUploadSectionCase .form-group label { display: block; margin-bottom: 10px; font-weight: 500; color: #666; font-size: 15px; }
+    #slipUploadSectionCase .form-group input[type="file"] { display: inline-block; width: auto; max-width: 280px; margin: 0 auto; padding: 12px 15px; background-color: #f9f9f9; border: 2px dashed #bfd8bf; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; font-size: 14px; color: #666; }
+    #slipUploadSectionCase .form-group input[type="file"]::file-selector-button { background-color: var(--pawpal-green); color: white; border: none; padding: 8px 16px; border-radius: 20px; margin-right: 10px; cursor: pointer; transition: background-color 0.3s ease; }
+    #slipUploadSectionCase .form-group input[type="file"]:hover { border-color: var(--pawpal-green); background-color: var(--pawpal-light-green); }
+    #slipUploadSectionCase .form-group input[type="file"]::file-selector-button:hover { background-color: #7ba579; }
+    /* === END OF MINIMAL & CUTE QR CODE CONTAINER STYLES === */
+
+    .action-button-case { background: linear-gradient(135deg, var(--pawpal-light-orange-accent) 0%, var(--pawpal-primary) 100%); color: white; border: none; border-radius: 30px; padding: 12px 30px; width: auto; max-width: 280px; font-size: 16px; font-weight: bold; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.3s ease; margin: 15px auto 10px; display: block; box-shadow: 0 5px 15px rgba(213, 94, 0, 0.3); letter-spacing: 0.5px; }
+    .action-button-case:hover { background: linear-gradient(135deg, #ff9c52 0%, #e56810 100%); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(213, 94, 0, 0.4); }
+    .action-button-case:active { transform: translateY(1px); }
+
+    .back-button-container { position: relative; height: 10px !important; }
+    .back-button { position: absolute; left: 15px; top: 135px !important; font-size: 30px; color: #5d4018; text-decoration: none; font-family: 'Varela Round', sans-serif; transition: color 0.3s ease; z-index: 10; padding: 5px; background-color: rgba(0,0,0,0.1); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .back-button:hover { color: #f0f0f0; background-color: rgba(0,0,0,0.2); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease; }
+    .popup-overlay.visible { visibility: visible; opacity: 1; }
+    .popup-content { background: #fff; padding: 30px; border-radius: var(--border-radius-cute); text-align: center; position: relative; max-width: 300px; width: 90%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+    .popup-content .close-btn { position: absolute; top: 10px; right: 10px; font-size: 20px; cursor: pointer; color: #aaa; border: none; background: none; }
+    .popup-content .close-btn:hover { color: #777; }
+    .popup-content .icon { font-size: 40px; color: var(--pawpal-primary); margin-bottom: 15px; }
+    .popup-content h4 { margin-top: 0; color: #333; font-size: 1.2em; }
+    .popup-content p { color: #555; line-height: 1.6; }
+
+    /* ADDED: Media query for responsive layout */
+    @media (max-width: 800px) { /* Adjust breakpoint as needed */
+        .donate-detail-container {
+            flex-direction: column; /* Stack them vertically */
+            align-items: center; /* Center cards when stacked */
+            max-width: 500px; /* Revert to original or suitable max-width for single column */
+        }
+        .pet-detail-card,
+        .donation-section {
+            flex-basis: auto; /* Reset flex-basis */
+            width: 100%;     /* Take full width of the container */
+            max-width: 100%; /* Ensure they don't get wider than their parent when stacked */
+        }
+        .pet-detail-card {
+            margin-bottom: 20px; /* Add margin back for vertical stacking */
+        }
+        .donation-section {
+            margin-top: 0; /* No top margin needed if pet-detail-card has bottom margin */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="back-button-container">
+    <a href="{% url 'donate' %}" class="back-button">←</a>
+</div>
+
+    <div class="page-header-title">
+        Donate for No. {{ case.case_id }}
+    </div>
+
+    <div class="donate-detail-container">
+        <div class="pet-detail-card">
+            <div class="pet-info-header">
+                <h3>No. {{ case.case_id }}</h3>
+                 <div class="gender-icon {% if case.pet.gender|lower == 'female' %}female{% endif %}">
+                    {% if case.pet.gender|lower == 'male' %}♂{% elif case.pet.gender|lower == 'female' %}♀{% else %}?{% endif %}
+                </div>
+            </div>
+            <div class="pet-detail-info">
+                <div class="pet-image">
+                    {% if case.image %}<img src="{{ case.image.url }}" alt="{{ case.title }}">
+                    {% elif case.pet.photo %}<img src="{{ case.pet.photo.url }}" alt="{{ case.pet.name }}">
+                    {% else %}<img src="{% static 'myapp/images/default_pet.png' %}" alt="No image available">{% endif %}
+                </div>
+                <div class="pet-details">
+                    <div class="detail-row"><span class="detail-label">Hospital:</span><span class="detail-value">{{ case.hospital|default:"N/A" }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Cause:</span><span class="detail-value">{{ case.title|default:"N/A" }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Gender:</span><span class="detail-value">{{ case.pet.get_gender_display|default:"N/A" }}</span></div>
+                    <div class="detail-row"><span class="detail-label">Age:</span><span class="detail-value">{{ case.pet.age|default:"N/A" }}</span></div>
+                </div>
+            </div>
+            <div class="pet-condition">
+                 <div class="condition-label"><span class="notebook-icon">📄</span> Description of the condition</div>
+                <p>{{ case.description|default:"No description provided." }}</p>
+            </div>
+        </div>
+
+        <div class="donation-section">
+            <div class="section-heading">Donate for No. {{ case.case_id }}</div>
+            <div class="amount-input">
+                <span>฿</span>
+                <input type="number" id="donationAmountInputCase" value="200" min="10" required>
+            </div>
+            <div class="payment-options" style="margin-top: 15px; margin-bottom: 15px;">
+                <div class="payment-option">
+                    <input type="radio" id="promptPayCase" name="paymentMethodCase" value="PromptPay" checked>
+                    <label for="promptPayCase" class="payment-button promptpay-label selected">
+                        <img src="{% static 'myapp/images/promptpay.png' %}" alt="PromptPay">
+                    </label>
+                </div>
+                <div class="payment-option">
+                    <input type="radio" id="otherPaymentCase" name="paymentMethodCase" value="Other">
+                    <label for="otherPaymentCase" class="payment-button">Other</label>
+                </div>
+            </div>
+
+            <button type="button" id="createQrOrProceedButtonCase" class="action-button-case">
+                <i class="fas fa-qrcode" style="margin-right: 8px;"></i> generate QR Code
+            </button>
+
+            <div id="generatedQrContainerCase" class="generated-qr-container" style="display: none;">
+                {# Decorative Paws - optional #}
+                <span class="decorative-paw top-left">🐾</span>
+                <span class="decorative-paw bottom-right">🐾</span>
+                {# QR code will be injected here by JavaScript #}
+            </div>
+
+            <div id="slipUploadSectionCase" style="display: none;">
+                <form id="case-donation-slip-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="donationAmount" id="hiddenDonationAmountSlipCase">
+                    <input type="hidden" name="paymentMethod" value="PromptPay">
+                    <input type="hidden" name="case_id" value="{{ case.pk }}">
+                    <div class="form-group">
+                        <label for="slip_image_case">
+                            <i class="fas fa-receipt" style="margin-right: 5px;"></i> แนบสลิป (หลังจากโอนเงินแล้ว):
+                        </label>
+                        <input type="file" id="slip_image_case" name="slip_image" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="action-button-case" id="confirmDonationWithSlipButtonCase">
+                        <i class="fas fa-check" style="margin-right: 8px;"></i> Donate
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="thank-you-popup" class="popup-overlay">
+        <div class="popup-content">
+            <button class="close-btn" onclick="document.getElementById('thank-you-popup').classList.remove('visible');">&times;</button>
+            <div class="icon">❤️</div>
+            <h4>Thank you for your donation!</h4>
+            <p>Your support helps us care for animals in need.</p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// JavaScript เดิมทั้งหมดของคุณจากไฟล์ donate_detail.html (ไม่เปลี่ยนแปลง)
+// ... (เนื้อหา JavaScript ของคุณทั้งหมด) ...
+document.addEventListener('DOMContentLoaded', function() {
+    const donationAmountInputCase = document.getElementById('donationAmountInputCase');
+    const paymentMethodRadiosCase = document.querySelectorAll('input[name="paymentMethodCase"]');
+    const createQrOrProceedButtonCase = document.getElementById('createQrOrProceedButtonCase');
+
+    const generatedQrContainerCase = document.getElementById('generatedQrContainerCase');
+    const slipUploadSectionCase = document.getElementById('slipUploadSectionCase');
+    const caseDonationSlipForm = document.getElementById('case-donation-slip-form');
+    const hiddenDonationAmountSlipCase = document.getElementById('hiddenDonationAmountSlipCase');
+    const slipImageInputCase = document.getElementById('slip_image_case');
+
+    const thankYouPopup = document.getElementById('thank-you-popup');
+    const closePopupBtn = thankYouPopup.querySelector('.close-btn');
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function updateCreateQrButtonCaseText() {
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethodCase"]:checked').value;
+        if (selectedPaymentMethod === 'PromptPay') {
+            createQrOrProceedButtonCase.innerHTML = '<i class="fas fa-qrcode" style="margin-right: 8px;"></i> Generate QR Code';
+        } else {
+            createQrOrProceedButtonCase.innerHTML = '<i class="fas fa-donate" style="margin-right: 8px;"></i> บริจาคเลย';
+        }
+    }
+
+    paymentMethodRadiosCase.forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.donation-section .payment-button').forEach(label => {
+                label.classList.remove('selected');
+            });
+            if (this.checked) {
+                const currentLabel = document.querySelector(`.donation-section label[for="${this.id}"]`);
+                if (currentLabel) {
+                    currentLabel.classList.add('selected');
+                }
+            }
+            updateCreateQrButtonCaseText();
+             // Always show the "Create QR Code / Donate Now" button when payment method changes
+            createQrOrProceedButtonCase.style.display = 'block';
+            generatedQrContainerCase.style.display = 'none'; // Hide QR if previously shown
+            slipUploadSectionCase.style.display = 'none'; // Hide slip upload if previously shown
+        });
+    });
+    updateCreateQrButtonCaseText();
+
+    if (createQrOrProceedButtonCase) {
+        createQrOrProceedButtonCase.addEventListener('click', function() {
+            const amount = donationAmountInputCase.value;
+            const paymentMethod = document.querySelector('input[name="paymentMethodCase"]:checked').value;
+
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('กรุณาระบุจำนวนเงินที่ถูกต้อง');
+                return;
+            }
+
+            const originalButtonHTML = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Processing...';
+
+            const submitUrl = "{% url 'donate_detail' pk=case.pk %}";
+
+            if (paymentMethod === 'PromptPay') {
+                const formData = new FormData();
+                formData.append('donationAmount', amount);
+                formData.append('paymentMethod', 'PromptPay');
+                formData.append('action', 'generate_qr_case');
+                formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+                fetch(submitUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.disabled = false; // Re-enable button
+                    this.innerHTML = originalButtonHTML; // Restore original button text
+
+                    if (data.success && data.action === 'qr_generated_case' && data.qr_code_image) {
+                        const existingPaws = generatedQrContainerCase.querySelectorAll('.decorative-paw');
+                        existingPaws.forEach(paw => paw.remove()); // Remove old paws before adding new ones
+
+                        const pawTopLeft = document.createElement('span');
+                        pawTopLeft.className = 'decorative-paw top-left';
+                        pawTopLeft.innerHTML = '🐾';
+                        generatedQrContainerCase.appendChild(pawTopLeft);
+
+                        const pawBottomRight = document.createElement('span');
+                        pawBottomRight.className = 'decorative-paw bottom-right';
+                        pawBottomRight.innerHTML = '🐾';
+                        generatedQrContainerCase.appendChild(pawBottomRight);
+
+                        let qrContentDiv = generatedQrContainerCase.querySelector('.qr-content-wrapper');
+                        if (!qrContentDiv) { // Create if doesn't exist
+                            qrContentDiv = document.createElement('div');
+                            qrContentDiv.className = 'qr-content-wrapper'; // Added class for easier selection if needed
+                            qrContentDiv.style.position = 'relative'; // Ensure content is above paws
+                            qrContentDiv.style.zIndex = '1';
+                            // Insert the content div before the paws or as the first child if no paws yet
+                            if(generatedQrContainerCase.firstChild && generatedQrContainerCase.firstChild.classList && generatedQrContainerCase.firstChild.classList.contains('decorative-paw')){
+                                generatedQrContainerCase.insertBefore(qrContentDiv, generatedQrContainerCase.firstChild);
+                            } else {
+                                generatedQrContainerCase.appendChild(qrContentDiv);
+                            }
+                        }
+                        qrContentDiv.innerHTML = `
+                            <p>Scan this QR Code to donate  ${data.amount} ฿ to case No. {{ case.case_id }}</p>
+                            ${data.promptpay_id_display ? `<p>(PromptPay ID: ${data.promptpay_id_display})</p>` : ''}
+                            <img src="data:image/png;base64,${data.qr_code_image}" alt="Generated PromptPay QR Code">
+                            <p class="qr-instruction">After scanning and transferring money, please attach the slip below for confirmation.</p>
+                        `;
+                        generatedQrContainerCase.style.display = 'block';
+                        slipUploadSectionCase.style.display = 'block';
+                        if(hiddenDonationAmountSlipCase) hiddenDonationAmountSlipCase.value = amount;
+                        // createQrOrProceedButtonCase.style.display = 'none'; // Keep button visible
+                    } else {
+                        alert('เกิดข้อผิดพลาดในการสร้าง QR Code: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating QR Code for case:', error);
+                    alert('เกิดข้อผิดพลาดในการสร้าง QR Code');
+                    this.disabled = false; // Re-enable button
+                    this.innerHTML = originalButtonHTML; // Restore original button text
+                });
+
+            } else { // 'Other' payment method
+                const formData = new FormData();
+                formData.append('donationAmount', amount);
+                formData.append('paymentMethod', 'Other');
+                formData.append('case_id', '{{ case.pk }}');
+                formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+                fetch(submitUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.disabled = false; // Re-enable button
+                    this.innerHTML = originalButtonHTML; // Restore original button text
+
+                    if (data.success && data.action === 'other_payment_submitted_case') {
+                        if (thankYouPopup) thankYouPopup.classList.add('visible');
+                        donationAmountInputCase.value = "200";
+                        document.getElementById('promptPayCase').checked = true;
+                        document.querySelectorAll('.donation-section .payment-button').forEach(label => label.classList.remove('selected'));
+                        document.querySelector('.donation-section label[for="promptPayCase"]').classList.add('selected');
+                        updateCreateQrButtonCaseText();
+                    } else {
+                        alert('เกิดข้อผิดพลาดในการบริจาค (ช่องทางอื่น): ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting "Other" donation for case:', error);
+                    alert('เกิดข้อผิดพลาดในการบริจาค (ช่องทางอื่น)');
+                    this.disabled = false; // Re-enable button
+                    this.innerHTML = originalButtonHTML; // Restore original button text
+                });
+            }
+        });
+    }
+
+    if (caseDonationSlipForm) {
+        caseDonationSlipForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (!slipImageInputCase.files || slipImageInputCase.files.length === 0) {
+                alert('กรุณาแนบสลิปเพื่อยืนยันการบริจาค');
+                return;
+            }
+            if(hiddenDonationAmountSlipCase) hiddenDonationAmountSlipCase.value = donationAmountInputCase.value;
+
+            const slipData = new FormData(this);
+            const confirmButton = this.querySelector('#confirmDonationWithSlipButtonCase');
+            const originalConfirmButtonHTML = confirmButton.innerHTML;
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Processing...';
+
+            fetch("{% url 'donate_detail' pk=case.pk %}", {
+                method: 'POST',
+                body: slipData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = originalConfirmButtonHTML;
+
+                if (data.success && data.action === 'slip_submitted_case') {
+                    if (thankYouPopup) thankYouPopup.classList.add('visible');
+                    caseDonationSlipForm.reset();
+                    donationAmountInputCase.value = "200";
+                    document.getElementById('promptPayCase').checked = true;
+                    document.querySelectorAll('.donation-section .payment-button').forEach(label => label.classList.remove('selected'));
+                    document.querySelector('.donation-section label[for="promptPayCase"]').classList.add('selected');
+
+                    generatedQrContainerCase.style.display = 'none';
+                    slipUploadSectionCase.style.display = 'none';
+                    createQrOrProceedButtonCase.style.display = 'block'; // Ensure "Create QR" button is visible again
+                    updateCreateQrButtonCaseText();
+                } else {
+                    alert('เกิดข้อผิดพลาดในการยืนยันการบริจาค: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting slip for case:', error);
+                alert('เกิดข้อผิดพลาดในการยืนยันการบริจาค');
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = originalConfirmButtonHTML;
+            });
+        });
+    }
+
+    if (closePopupBtn) {
+        closePopupBtn.addEventListener('click', function() {
+            thankYouPopup.classList.remove('visible');
+        });
+    }
+    if (thankYouPopup) { // Ensure thankYouPopup exists before adding listener
+        thankYouPopup.addEventListener('click', function(event) {
+            if (event.target === thankYouPopup) {
+                thankYouPopup.classList.remove('visible');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

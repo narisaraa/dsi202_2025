@@ -1,0 +1,780 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <style>
+    /* Custom fonts and variables */
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap'); /* Added Kanit font */
+    
+    :root {
+        --primary: #FF7043; /* ส้มหลัก */
+        --primary-light: #FFEADD; /* ส้มอ่อนมาก ๆ สำหรับพื้นหลัง */
+        --primary-dark: #E65100; /* ส้มเข้ม */
+        --secondary: #78909C; /* เทาอมฟ้า สำหรับข้อความรอง หรือส่วนที่ไม่เน้น */
+        --green: #4CAF50; /* เขียวสดใส */
+        --green-light: #E8F5E9; /* เขียวอ่อน */
+        --light-orange: #FFAB91; /* ส้มอ่อนสำหรับ accent */
+        --background: #FDFEFE; /* พื้นหลังเกือบขาว */
+        --accent-red: #EF5350; /* แดงสำหรับ tag 'NEW' */
+        --text-primary: #37474F; /* เทาเข้มสำหรับข้อความหลัก */
+        --text-secondary: #546E7A; /* เทาสำหรับข้อความรอง */
+        --card-shadow: 0 6px 18px rgba(0,0,0,0.07);
+        --card-hover-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        --transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --font-body: 'Sarabun', sans-serif; /* For general text */
+        --font-contact-section: 'Kanit', sans-serif; /* Font for contact section */
+        --font-headings: 'Sarabun', sans-serif; /* Or 'Kanit' if you prefer for titles too */
+    }
+
+    body {
+        font-family: var(--font-body);
+        background-color: var(--background);
+        margin: 0;
+        padding-bottom: 70px;
+        color: var(--text-primary);
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Improved page header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        margin-bottom: 30px;
+        box-shadow: 0 8px 15px rgba(255, 112, 67, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .page-header::before, .page-header::after {
+        content: '';
+        position: absolute;
+        background: rgba(255,255,255,0.08);
+        border-radius: 50%;
+        opacity: 0.7;
+    }
+    
+    .page-header::before { top: -60px; right: -60px; width: 180px; height: 180px; }
+    .page-header::after { bottom: -40px; left: -40px; width: 120px; height: 120px; }
+    
+    .page-title {
+        font-family: var(--font-headings);
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .page-subtitle {
+        font-family: var(--font-body);
+        font-size: 17px;
+        font-weight: 400;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Enhanced about section */
+    .container {
+        padding: 0 20px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    
+    .card {
+        background-color: white;
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 30px;
+        padding: 30px;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+    }
+    
+    .card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--card-hover-shadow);
+    }
+    
+    .section-title {
+        font-family: var(--font-headings);
+        color: var(--primary-dark);
+        font-size: 24px;
+        margin-bottom: 25px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding-bottom: 12px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 70px;
+        height: 4px;
+        background-color: var(--primary);
+        border-radius: 2px;
+    }
+    
+    .paw-icon {
+        color: var(--primary);
+        margin-left: 12px;
+        font-size: 26px;
+    }
+    
+    .about-content {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        font-size: 16px;
+        line-height: 1.75;
+    }
+    
+    .highlight {
+        background-color: var(--primary-light);
+        padding: 25px;
+        border-radius: var(--border-radius-md);
+        margin: 25px 0;
+        font-weight: 500;
+        color: var(--primary-dark);
+        position: relative;
+        border-left: 5px solid var(--primary);
+        box-shadow: 0 4px 10px rgba(255,112,67,0.1);
+    }
+    
+    .highlight::before {
+        content: '\f10d'; 
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 10px;
+        left: 15px;
+        font-size: 36px;
+        color: var(--primary);
+        opacity: 0.25;
+    }
+
+    /* --- Stats Section (Shared Styles) --- */
+    .stats-container {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+    
+    /* --- NEW Stats Layout (Triangular) --- */
+    .stats-container.new-stats-layout .stats-title { /* Title for new layout */
+        font-family: var(--font-headings);
+        color: white;
+        background-color: var(--primary); /* Orange as per example image */
+        display: inline-block;
+        padding: 10px 25px;
+        border-radius: 50px;
+        margin-bottom: 45px; /* Increased margin */
+        font-weight: 600;
+        font-size: 19px;
+        box-shadow: 0 4px 12px rgba(255, 112, 67, 0.3);
+    }
+
+    .stats-container.new-stats-layout .stats-chart {
+        position: relative;
+        width: 100%;
+        max-width: 480px; /* Adjusted max-width */
+        height: 320px;    /* Adjusted height */
+        margin: 0 auto;
+        display: block; 
+    }
+
+    .stats-container.new-stats-layout .stat-point {
+        position: absolute;
+        text-align: center;
+        width: 170px; /* Adjusted width */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stats-container.new-stats-layout .stat-point .stat-icon {
+        margin-bottom: 12px; /* Increased margin */
+        height: 55px; /* Adjusted height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-dark); /* Icon color */
+    }
+    .stats-container.new-stats-layout .stat-point .stat-icon i {
+        font-size: 46px; /* Adjusted icon size */
+    }
+    .stats-container.new-stats-layout .stat-point .stat-icon img {
+        max-height: 100%;
+        max-width: 100%;
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+    }
+
+    .stats-container.new-stats-layout .stat-number {
+        font-family: var(--font-headings); /* Or a specific numeric font */
+        font-size: 30px; 
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 6px;
+    }
+
+    .stats-container.new-stats-layout .stat-label {
+        font-family: var(--font-body);
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.45;
+    }
+
+    .stats-container.new-stats-layout .top-center {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .stats-container.new-stats-layout .bottom-left {
+        bottom: 10px; 
+        left: 10px; 
+    }
+
+    .stats-container.new-stats-layout .bottom-right {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .stats-container.new-stats-layout .triangle-lines-svg {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0; /* Behind stat points if they have higher z-index */
+        pointer-events: none;
+    }
+
+    .stats-container.new-stats-layout .triangle-lines-svg .triangle-line {
+        stroke: #DDC0A0; /* Softer brown/beige */
+        stroke-width: 2.5;
+    }
+    
+    /* --- OLD Stats Layout (Flexbox - kept for reference or fallback) --- */
+    /* Title for old layout if different */
+    .stats-container:not(.new-stats-layout) .stats-title { 
+        font-family: var(--font-headings);
+        color: white;
+        background-color: var(--green); /* Green for old layout */
+        display: inline-block;
+        padding: 10px 25px;
+        border-radius: 50px;
+        margin-bottom: 35px;
+        font-weight: 600;
+        font-size: 19px;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    .stats-container:not(.new-stats-layout) .stats-chart {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+        position: relative;
+        min-height: 220px;
+        margin: 40px 0;
+        padding: 0 10px;
+    }
+    .stats-container:not(.new-stats-layout) .stat-number { /* Shared class, ensure distinction if needed */
+        font-family: var(--font-headings);
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 8px;
+    }
+    .stats-container:not(.new-stats-layout) .stat-label { /* Shared class */
+        font-family: var(--font-body);
+        font-size: 15px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    .stats-container:not(.new-stats-layout) .triangle-point {
+        position: relative;
+        transition: var(--transition);
+        width: calc(100% / 3 - 20px);
+        text-align: center;
+    }
+    .stats-container:not(.new-stats-layout) .triangle-point:hover {
+        transform: translateY(-5px) scale(1.03);
+    }
+    .stats-container:not(.new-stats-layout) .triangle-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: var(--primary);
+        filter: drop-shadow(0 4px 6px rgba(255,112,67,0.2));
+        transition: var(--transition);
+    }
+    .stats-container:not(.new-stats-layout) .triangle-point:hover .triangle-icon {
+        transform: scale(1.15) rotate(5deg);
+        color: var(--primary-dark);
+    }
+    .stats-container:not(.new-stats-layout) .triangle-lines {
+        position: absolute;
+        width: calc(100% - 100px); height: 70%;
+        top: 15%; left: 50px;
+        z-index: -1; opacity: 0.7;
+    }
+    .stats-container:not(.new-stats-layout) .triangle-lines line {
+        stroke: var(--primary-light); stroke-width: 2.5; stroke-dasharray: 6,6;
+    }
+    .stats-container:not(.new-stats-layout) .triangle-lines circle {
+        fill: var(--primary-light); r: 4;
+    }
+    /* --- End of OLD Stats Layout specific styles --- */
+
+
+    /* Enhanced blog section */
+    .section-header {
+        font-family: var(--font-headings);
+        background-color: var(--green);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 20px;
+        margin-bottom: 25px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 6px 15px rgba(76, 175, 80, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    .section-header::after {
+        content: ''; position: absolute;
+        top: -15px; right: -15px; width: 80px; height: 80px;
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    
+    .blog-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .blog-card {
+        background-color: white;
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        height: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+    .blog-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-hover-shadow);
+    }
+    
+    .blog-link {
+        text-decoration: none; color: inherit;
+        display: flex; flex-direction: column; height: 100%;
+    }
+    
+    .blog-image {
+        width: 100%; height: 150px;
+        object-fit: cover;
+        transition: transform 0.4s ease-out;
+        display: block;
+    }
+    .blog-card:hover .blog-image { transform: scale(1.08); }
+    
+    .blog-card-content {
+        padding: 18px; flex-grow: 1;
+        display: flex; flex-direction: column; justify-content: space-between;
+    }
+    
+    .blog-card-title {
+        font-family: var(--font-headings); /* Or body font */
+        font-weight: 600; font-size: 16px;
+        color: var(--text-primary);
+        line-height: 1.5; margin-top: auto;
+    }
+    
+    .new-tag {
+        background-color: var(--accent-red); color: white;
+        padding: 4px 10px; border-radius: var(--border-radius-sm);
+        font-size: 11px; font-weight: 600;
+        display: inline-block; margin-bottom: 8px;
+        box-shadow: 0 2px 5px rgba(239,83,80,0.35);
+    }
+    
+    .view-all { text-align: center; margin-top: 25px; }
+    .view-all-btn {
+        font-family: var(--font-body);
+        background-color: var(--green-light); color: var(--green);
+        border: 1px solid var(--green);
+        padding: 12px 30px; border-radius: 50px;
+        font-weight: 600; text-decoration: none;
+        display: inline-block; transition: var(--transition);
+        cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .view-all-btn:hover {
+        background-color: var(--green); color: white;
+        box-shadow: 0 5px 12px rgba(76, 175, 80, 0.3);
+        transform: translateY(-2px);
+    }
+    .view-all-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .hidden {
+        display: none; opacity: 0; transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .visible {
+        display: flex !important; opacity: 1; transform: translateY(0);
+    }
+
+    /* Redesigned contact section */
+    .contact-section {
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, white 0%, #F8F9FA 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 30px; box-shadow: var(--card-shadow);
+    }
+    
+    .contact-title {
+        font-family: var(--font-contact-section); /* Using Kanit */
+        font-weight: 600; font-size: 22px;
+        margin-bottom: 25px; color: var(--secondary);
+        position: relative; padding-bottom: 12px;
+    }
+    .contact-title::after {
+        content: ''; position: absolute;
+        bottom: 0; left: 0; width: 55px; height: 4px;
+        background-color: var(--secondary);
+        border-radius: 2px;
+    }
+    
+    .contact-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+    }
+    
+    .contact-item {
+        display: flex; align-items: center;
+        padding: 20px; background-color: white;
+        border-radius: var(--border-radius-md);
+        transition: var(--transition);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        border: 1px solid #ECEFF1;
+    }
+    .contact-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        border-color: var(--primary-light);
+    }
+    
+    .contact-icon {
+        width: 48px; height: 48px;
+        background-color: var(--primary-light);
+        border-radius: 50%; display: flex;
+        align-items: center; justify-content: center;
+        margin-right: 20px; color: var(--primary);
+        font-size: 20px; flex-shrink: 0;
+    }
+    
+    .contact-info {
+        font-family: var(--font-contact-section); /* Using Kanit */
+        font-size: 15px; color: var(--text-secondary);
+        line-height: 1.6;
+    }
+    
+    .contact-label {
+        font-family: var(--font-contact-section); /* Using Kanit */
+        display: block; font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 5px; font-size: 16px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        /* Responsive for OLD stats layout */
+        .stats-container:not(.new-stats-layout) .stats-chart {
+            flex-direction: column; align-items: center; min-height: auto;
+        }
+        .stats-container:not(.new-stats-layout) .triangle-point {
+            width: 80%; margin-bottom: 30px;
+        }
+        .stats-container:not(.new-stats-layout) .triangle-point:last-child { margin-bottom: 0; }
+        .stats-container:not(.new-stats-layout) .triangle-lines { display: none; }
+    }
+
+    @media (max-width: 768px) {
+        .blog-cards { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+        .contact-items { grid-template-columns: 1fr; gap: 20px; }
+        .page-title { font-size: 28px; }
+        .section-title { font-size: 22px; }
+        .card { padding: 25px; }
+
+        /* Responsive for NEW stats layout */
+        .stats-container.new-stats-layout .stats-chart {
+            height: auto; max-width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .stats-container.new-stats-layout .stat-point {
+            position: relative; width: 80%; max-width: 280px; /* Increased max-width */
+            margin-bottom: 35px; /* Increased margin */
+            top: auto; left: auto; bottom: auto; right: auto;
+            transform: none;
+        }
+        .stats-container.new-stats-layout .stat-point:last-child { margin-bottom: 0; }
+        .stats-container.new-stats-layout .triangle-lines-svg { display: none; }
+        .stats-container.new-stats-layout .stats-title { margin-bottom: 30px; }
+    }
+    
+    @media (max-width: 480px) {
+        .blog-cards { grid-template-columns: 1fr; }
+        .card { padding: 20px; }
+        .section-title { font-size: 20px; }
+        
+        /* OLD stats layout icons */
+        .stats-container:not(.new-stats-layout) .triangle-icon { font-size: 40px; }
+        .stats-container:not(.new-stats-layout) .stat-number { font-size: 26px; }
+        
+        /* NEW stats layout icons & numbers */
+        .stats-container.new-stats-layout .stat-point .stat-icon i { font-size: 40px; }
+        .stats-container.new-stats-layout .stat-number { font-size: 26px; }
+
+        .page-header { padding: 30px 15px; }
+        .page-title { font-size: 24px; }
+        .page-subtitle { font-size: 15px; }
+        .contact-item { flex-direction: column; align-items: flex-start; }
+        .contact-icon { margin-bottom: 10px; }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="page-title">About Us</div>
+        <div class="page-subtitle">Get to know the PawPal team and our mission</div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="section-title">{{ about.what_we_do_title|default:"What We Do" }} <span class="paw-icon"><i class="fas fa-paw"></i></span></h2>
+            <p class="about-content">{{ about.what_we_do_content|default:"PawPal is dedicated to improving the lives of stray animals. We focus on rescue, rehabilitation, and rehoming, ensuring every animal gets a chance at a happy, healthy life." }}</p>
+            <p class="about-content">{{ about.what_we_do_content2|default:"Our team works tirelessly to provide medical care, food, and shelter. We also run awareness programs to promote responsible pet ownership." }}</p>
+
+            <div class="highlight">
+                {{ about.tagline|default:"\"Saving one animal won't change the world, but for that one animal, the world will change forever.\"" }}
+            </div>
+
+            <h2 class="section-title">{{ about.why_we_do_title|default:"Why We Do It" }} <span class="paw-icon"><i class="fas fa-heart"></i></span></h2>
+            <p class="about-content">{{ about.why_we_do_content|default:"Our passion for animals drives us. We believe every creature deserves kindness and a safe environment. Witnessing the transformation of a rescued animal into a beloved pet is our greatest reward." }}</p>
+            <p class="about-content">{{ about.why_we_do_content2|default:"We aim to create a community where animals are treated with respect and compassion, reducing the number of strays through spaying/neutering and education." }}</p>
+        </div>
+
+        <div class="stats-container new-stats-layout">
+    <div class="stats-title">{{ stats.stats_title|default:"Hope in Numbers" }}</div>
+
+    <div class="stats-chart">
+        <div class="stat-point top-center">
+            <div class="stat-icon">
+                <i class="fas fa-heart-circle-plus"></i>
+            </div>
+            <div class="stat-number">{{ stats.treated_count|default:"200" }}</div>
+            <div class="stat-label">{{ stats.treated_label|default:"Sick and injured animals treated" }}</div>
+        </div>
+
+        <div class="stat-point bottom-left">
+            <div class="stat-icon">
+                <i class="fas fa-paw"></i> </div>
+            <div class="stat-number">{{ stats.adopted_count|default:"100" }}</div> <div class="stat-label">{{ stats.adopted_label|default:"Animals adopted to new homes" }}</div>
+        </div>
+
+        <div class="stat-point bottom-right">
+            <div class="stat-icon">
+                <i class="fas fa-syringe"></i>
+            </div>
+            <div class="stat-number">{{ stats.neutered_count|default:"112" }}</div>
+            <div class="stat-label">{{ stats.neutered_label|default:"Animals neutered and vaccinated" }}</div>
+        </div>
+
+      
+    </div>
+</div>
+        <div class="section-header">
+            Blog and Resources
+        </div>
+
+        <div class="blog-cards" id="blogCardContainer">
+            {% for post in blog_posts %}
+            <a href="{{ post.url|default:'#' }}" class="blog-link" target="_blank">
+                <div class="blog-card {% if forloop.counter > 4 %}hidden{% endif %}">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="blog-image">
+                    {% else %}
+                        <img src="{% static 'myapp/images/default_blog.png' %}" alt="Default image" class="blog-image">
+                    {% endif %}
+                    <div class="blog-card-content">
+                        <div class="blog-card-title">
+                            {% if post.is_new %}
+                                <span class="new-tag">NEW</span>
+                            {% endif %}
+                            {{ post.title }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+                {% with default_posts_count=4 %}
+                {% for i in "123456"|make_list %}
+                <a href="https://blog.pawpal.com/example-post-{{i}}" class="blog-link" target="_blank">
+                    <div class="blog-card {% if forloop.counter > default_posts_count %}hidden{% endif %}">
+                        {% if i == "1" %}
+                        <img src="{% static 'myapp/images/blog_image1.png' %}" alt="Pet care tips" class="blog-image">
+                        <div class="blog-card-content"><div class="blog-card-title"><span class="new-tag">NEW</span>พลเมืองดีช่วยน้องเมื่อพบเจอว่าป่วย</div></div>
+                        {% elif i == "2" %}
+                        <img src="{% static 'myapp/images/blog_image2.png' %}" alt="Dog health" class="blog-image">
+                        <div class="blog-card-content"><div class="blog-card-title">วิธีดูสุขภาพของน้องหมา?</div></div>
+                        {% elif i == "3" %}
+                        <img src="{% static 'myapp/images/default_blog.png' %}" alt="Cat care" class="blog-image">
+                        <div class="blog-card-content"><div class="blog-card-title">การดูแลน้องแมวเบื้องต้น</div></div>
+                        {% elif i == "4" %}
+                        <img src="{% static 'myapp/images/default_blog.png' %}" alt="Vaccination" class="blog-image">
+                        <div class="blog-card-content"><div class="blog-card-title">ตารางวัคซีนสำหรับสัตว์เลี้ยง</div></div>
+                        {% elif i == "5" %}
+                        <img src="{% static 'myapp/images/default_blog.png' %}" alt="Training" class="blog-image">
+                        <div class="blog-card-content"><div class="blog-card-title">5 เคล็ดลับฝึกน้องหมาให้อยู่หมัด</div></div>
+                        {% else %}
+                        <img src="{% static 'myapp/images/default_blog.png' %}" alt="Nutrition" class="blog-image">
+                        <div class="blog-card-content"><div class="blog-card-title">อาหารที่เหมาะสมสำหรับน้องแมวแต่ละวัย</div></div>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+        
+        <div class="view-all" id="viewAllContainer">
+            <button class="view-all-btn" id="viewAllArticles">ดูบทความทั้งหมด</button>
+        </div>
+
+        <div class="contact-section">
+            <div class="contact-title">Contact Us</div>
+            <div class="contact-items">
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                    <div class="contact-info">
+                        <span class="contact-label">โทรศัพท์</span>
+                        {{ contact.phone|default:"02-123-4567, 081-234-5678" }}
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="far fa-clock"></i></div>
+                    <div class="contact-info">
+                        <span class="contact-label">เวลาทำการ</span>
+                        {{ contact.opening_hours|default:"จันทร์ - ศุกร์: 9:00 - 18:00 น." }}<br>
+                        {{ contact.closing_days|default:"เสาร์ - อาทิตย์ และวันหยุดนักขัตฤกษ์: ปิดทำการ" }}
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="contact-info">
+                        <span class="contact-label">ที่อยู่</span>
+                        {{ contact.description|default:"123 PawPal St, Happy Sub-district, Friendly District, Bangkok 10110" }}
+                    </div>
+                </div>
+                 <div class="contact-item">
+                    <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="contact-info">
+                        <span class="contact-label">อีเมล</span>
+                        {{ contact.email|default:"contact@pawpal.com" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const viewAllBtn = document.getElementById('viewAllArticles');
+        const blogCardContainer = document.getElementById('blogCardContainer');
+        
+        if (viewAllBtn && blogCardContainer) {
+            // เก็บข้อความดั้งเดิมของปุ่มไว้
+            const originalButtonText = viewAllBtn.innerHTML; 
+
+            // นับจำนวนการ์ดที่ซ่อนอยู่ทั้งหมดในตอนแรก
+            // เราจะ querySelectorAll ทุกครั้งที่คลิก เพื่อให้ได้ NodeList ที่อัปเดต
+            // แต่สำหรับเงื่อนไขเริ่มต้น เราเช็คจากจำนวนการ์ดทั้งหมดที่ถูก render ว่ามีตัวไหนซ่อนอยู่บ้าง
+            const initiallyHiddenCards = blogCardContainer.querySelectorAll('a > .blog-card.hidden');
+
+            if (initiallyHiddenCards.length === 0) {
+                // ถ้าไม่มีการ์ดที่ซ่อนไว้เลยตั้งแต่แรก (เช่น มีบทความน้อยกว่า 4 บทความ)
+                // ให้ปุ่มแสดงว่า "แสดงบทความทั้งหมดแล้ว" และ disable
+                // หรือจะซ่อนปุ่มไปเลยก็ได้ ถ้าไม่ต้องการให้แสดง
+                viewAllBtn.innerHTML = 'Show all';
+                viewAllBtn.disabled = true;
+                viewAllBtn.style.opacity = '0.7';
+                // หรือถ้าจะซ่อนปุ่ม: viewAllBtn.style.display = 'none';
+            } else {
+                // ถ้ามีการ์ดที่ซ่อนอยู่ ให้ปุ่มทำงานตามปกติ
+                viewAllBtn.innerHTML = originalButtonText; // ตรวจสอบให้แน่ใจว่าข้อความเป็น "ดูบทความทั้งหมด"
+
+                viewAllBtn.addEventListener('click', function() {
+                    this.innerHTML = 'กำลังโหลดบทความ... <i class="fas fa-spinner fa-spin"></i>';
+                    this.disabled = true;
+
+                    let delay = 0;
+                    // หาการ์ดที่ยังซ่อนอยู่ในขณะที่คลิก
+                    const cardsToShowOnClick = blogCardContainer.querySelectorAll('a > .blog-card.hidden');
+
+                    if (cardsToShowOnClick.length > 0) {
+                        cardsToShowOnClick.forEach(card => {
+                            // เราใช้ card โดยตรง เพราะ cardsToShowOnClick คือ NodeList ของ .blog-card elements
+                            if (card.classList.contains('hidden')) { 
+                                setTimeout(() => {
+                                    card.classList.remove('hidden');
+                                    card.classList.add('visible');
+                                }, delay);
+                                delay += 100; 
+                            }
+                        });
+                        
+                        setTimeout(() => {
+                            this.innerHTML = 'All blogs';
+                            this.style.opacity = '0.7';
+                            // ปุ่มยังคง disabled เพราะแสดงทั้งหมดแล้ว
+                        }, delay + 300); // รอ animation ของการ์ดสุดท้าย + buffer เล็กน้อย
+                    } else {
+                        // กรณีนี้ไม่ควรเกิดขึ้นถ้า logic ด้านบนถูกต้อง 
+                        // แต่ใส่ไว้เผื่อว่าไม่มีการ์ดซ่อนแล้วแต่ปุ่มยัง active อยู่
+                        this.innerHTML = 'show all blogs';
+                        this.style.opacity = '0.7';
+                    }
+                });
+            }
+        }
+    });
+    </script>
+{% endblock %}

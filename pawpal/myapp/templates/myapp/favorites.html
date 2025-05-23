@@ -1,0 +1,364 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <style>
+        /* Custom fonts and base styles are now in base.html */
+
+        /* Page specific styles for favorites.html */
+        /* Header styles are now in base.html */
+
+        /* Filter tabs */
+        .filter-tabs {
+            display: flex;
+            padding: 10px 15px;
+            background-color: var(--green);
+            justify-content: space-between;
+            margin-top: 0;
+        }
+
+        .filter-tab {
+            padding: 5px 15px;
+            border-radius: 50px;
+            background-color: transparent;
+            color: white;
+            border: none;
+            font-size: 14px;
+        }
+
+        .filter-tab.active {
+            background-color: white;
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        .favorites-list {
+            padding: 15px;
+        }
+
+        /* ปรับ layout ของแต่ละรายการสัตว์เลี้ยงให้มี checkbox */
+        .pet-item {
+            background-color: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+            position: relative;
+        }
+
+        .pet-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-right: 15px;
+            flex-shrink: 0; /* ป้องกันรูปภาพถูกย่อ */
+        }
+
+        .pet-info {
+            flex-grow: 1; /* ให้ส่วนข้อมูลขยายเต็มที่ */
+            margin-right: 15px; /* เพิ่มระยะห่างระหว่างข้อมูลกับ checkbox */
+        }
+
+        .pet-number {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .pet-details {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .pet-badges {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .badge {
+            background-color: #f0f0f0;
+            border-radius: 20px !important;
+            padding: 3px 8px;
+            font-size: 12px;
+            color: #666 !important;
+        }
+
+        /* ปรับตำแหน่งของ favorite status icon ให้อยู่มุมขวาบน */
+        .favorite-status {
+            position: absolute;
+            top: 10px; /* ปรับตำแหน่ง */
+            right: 10px; /* ปรับตำแหน่ง */
+            color: var(--accent-red);
+            font-size: 20px; /* ปรับขนาดเล็กน้อย */
+            cursor: pointer;
+            z-index: 1; /* ให้อยู่เหนือเนื้อหา */
+        }
+
+        /* สไตล์สำหรับ Checkbox ให้เป็นวงกลม */
+        .pet-checkbox {
+            width: 24px; /* กำหนดขนาด checkbox */
+            height: 24px;
+            margin-left: auto; /* ชิดขวา */
+            flex-shrink: 0; /* ป้องกัน checkbox ถูกย่อ */
+            /* Added styles for circular appearance */
+            -webkit-appearance: none; /* ลบการแสดงผลเริ่มต้นของ browser */
+            -moz-appearance: none;
+            appearance: none;
+            border: 2px solid #ccc; /* เพิ่มเส้นขอบ */
+            border-radius: 50%; /* ทำให้เป็นวงกลม */
+            outline: none; /* ลบเส้น outline เวลา focus */
+            cursor: pointer; /* เปลี่ยน cursor เมื่อชี้ */
+            position: relative; /* จำเป็นสำหรับการวางตำแหน่งเครื่องหมายถูก */
+            background-color: white; /* ตั้งพื้นหลังเป็นสีขาว */
+        }
+
+        /* สไตล์เมื่อ Checkbox ถูกเลือก */
+        .pet-checkbox:checked {
+            border-color: var(--green); /* เปลี่ยนสีขอบ */
+            background-color: var(--green); /* เปลี่ยนสีพื้นหลัง */
+        }
+
+        /* เพิ่มเครื่องหมายถูก (checkmark) เมื่อ Checkbox ถูกเลือก */
+        .pet-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px; /* ขนาดของเครื่องหมายถูก */
+            height: 10px; /* ขนาดของเครื่องหมายถูก */
+            border: solid white; /* สีของเครื่องหมายถูก */
+            border-width: 0 3px 3px 0; /* กำหนดความหนาและรูปร่างของเส้น */
+            transform: translate(-50%, -50%) rotate(45deg); /* จัดตำแหน่งและหมุนให้เป็นเครื่องหมายถูก */
+        }
+
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #999;
+        }
+
+        /* ปรับปุ่ม Adopt ให้อยู่ในตำแหน่งที่ต้องการ */
+        .adopt-button-container {
+             padding: 15px;
+             background-color: var(--background); /* สีพื้นหลังเดียวกับ body */
+             padding-bottom: 70px; /* เพิ่ม padding ด้านล่างเพื่อไม่ให้ชนกับ footer */
+        }
+
+
+        .adopt-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: block;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer; /* แสดงว่าเป็นปุ่มที่กดได้ */
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# The header is now provided by base.html #}
+
+    <div class="filter-tabs">
+        <button class="filter-tab active" id="all-tab">All</button>
+    </div>
+
+    <div class="favorites-list">
+        {% if favorite_pets %}
+            {% for pet in favorite_pets %}
+            <div class="pet-item">
+                {# คุณสามารถใส่ลิงก์ไปยังหน้ารายละเอียดสัตว์เลี้ยงรอบรูปหรือข้อมูลได้ที่นี่ #}
+                {# <a href="{% url 'pet_detail' pet.id %}" class="text-decoration-none text-dark d-flex align-items-center w-100"> #}
+
+                {% if pet.photo %}
+                    <img src="{{ pet.photo.url }}" alt="{{ pet.name }}" class="pet-image">
+                {% else %}
+                    <img src="{% static 'myapp/images/default_pet.png' %}" alt="No image available" class="pet-image">
+                {% endif %}
+
+                <div class="pet-info">
+                    <div class="pet-number">No. {{ pet.name }}</div>
+                    <div class="pet-details">
+                        Breed: {{ pet.breed }}<br>
+                        Gender: {{ pet.gender }}<br>
+                        Age: {{ pet.age }}<br>
+                        Personality: {{ pet.personality }}
+                    </div>
+                </div>
+                {# </a> #}
+
+                {# Icon Favorite สำหรับลบออกจากรายการโปรด #}
+                <div class="favorite-status" data-pet-id="{{ pet.id }}">
+                    <i class="fas fa-heart"></i>
+                </div>
+
+                {# Checkbox สำหรับเลือกสัตว์เลี้ยงเพื่อนำไปสู่การ Adopt #}
+                <input type="checkbox" class="pet-checkbox" data-pet-id="{{ pet.id }}">
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="empty-state">
+                <i class="far fa-heart"></i>
+                <p>You don't have any favorites yet.<br>Go add some pets to your favorites!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# ปุ่ม Adopt อยู่ใน main content #}
+     {% if favorite_pets %}
+    <div class="adopt-button-container">
+        {# เปลี่ยนจาก a tag เป็น button และเพิ่ม id เพื่อให้ JavaScript อ้างอิงได้ #}
+        <button class="adopt-button" id="adoptSelectedButton">Let's Adopt </button>
+    </div>
+    {% endif %}
+
+
+    {# The footer is now included by base.html #}
+
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle favorite toggles in favorites page (unfavorite)
+            const favoriteIcons = document.querySelectorAll('.favorite-status');
+            favoriteIcons.forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const petId = this.getAttribute('data-pet-id');
+                    toggleFavorite(petId, this);
+                });
+            });
+
+            // Function to toggle favorite status (used for unfavoriting from this page)
+            function toggleFavorite(petId, element) { // element คือ div.favorite-status
+    fetch(`/toggle-favorite/${petId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest' // สำคัญเพื่อให้ Django รู้ว่าเป็น AJAX
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            // จัดการ error ต่างๆ เช่น user ไม่ได้ login, server error
+            if (response.status === 403) { // Forbidden (user not authenticated)
+                alert('Please log in to manage your favorites.');
+                // อาจจะ redirect ไปหน้า login
+                // window.location.href = "{% url 'account_login' %}?next=" + window.location.pathname;
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+            console.error('Error toggling favorite:', response.status, response.statusText);
+            return Promise.reject('Response not OK: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) { // ถ้า server ส่ง error message กลับมา
+            alert('Error: ' + data.error);
+            return;
+        }
+
+        if (data.is_favorite === false) { // ตรวจสอบว่า unfavorite สำเร็จ
+            const petItemElement = element.closest('.pet-item');
+            if (petItemElement) {
+                petItemElement.remove(); // ลบ pet item ออกจาก DOM
+            } else {
+                console.error("Could not find '.pet-item' ancestor of the clicked favorite icon.");
+            }
+
+            // อัปเดตจำนวน fav ใน header
+            const favCountHeader = document.querySelector('header a[href="{% url "favorites" %}"] .favorite-count-badge');
+            if (favCountHeader && data.favorite_count !== undefined) {
+                favCountHeader.textContent = data.favorite_count;
+                favCountHeader.style.display = data.favorite_count > 0 ? 'flex' : 'none';
+                // ถ้า favCountHeader ถูกซ่อนไว้ตั้งแต่แรกเพราะ count เป็น 0, ต้องสร้าง element นี้ขึ้นมาใหม่หรือแสดงผล
+                // ซึ่งการแก้ไขที่ base.html ให้มี span เสมอจะช่วยเรื่องนี้
+            }
+
+            // ตรวจสอบว่ามี pet items เหลืออยู่หรือไม่
+            const remainingPetItems = document.querySelectorAll('.favorites-list .pet-item');
+            if (remainingPetItems.length === 0) {
+                const emptyStateHtml = `
+                    <div class="empty-state">
+                        <i class="far fa-heart"></i>
+                        <p>You don't have any favorites yet.<br>Go add some pets to your favorites!</p>
+                    </div>`;
+                const favoritesListContainer = document.querySelector('.favorites-list');
+                if (favoritesListContainer) {
+                    favoritesListContainer.innerHTML = emptyStateHtml;
+                }
+
+                const adoptButtonContainer = document.querySelector('.adopt-button-container');
+                if (adoptButtonContainer) {
+                    adoptButtonContainer.style.display = 'none';
+                }
+            }
+        }
+        // ไม่จำเป็นต้องทำอะไรถ้า data.is_favorite เป็น true ในหน้านี้ เพราะเราคาดหวังแค่การ unfavorite
+    })
+    .catch(error => {
+        console.error('Error during toggleFavorite fetch:', error);
+        // ไม่ต้องแสดง alert ซ้ำ ถ้า response.ok เป็น false ได้จัดการไปแล้ว
+    });
+}
+            // Handle Adopt Selected Pets button click
+            const adoptSelectedButton = document.getElementById('adoptSelectedButton');
+            if (adoptSelectedButton) {
+                adoptSelectedButton.addEventListener('click', function() {
+                    const selectedPetIds = [];
+                    // Find all checked checkboxes
+                    const checkboxes = document.querySelectorAll('.pet-checkbox:checked');
+                    checkboxes.forEach(checkbox => {
+                        selectedPetIds.push(checkbox.getAttribute('data-pet-id'));
+                    });
+
+                    if (selectedPetIds.length > 0) {
+                        // Redirect to the adoption form page with selected pet IDs
+                        // Assuming your adoption form page can handle a list of pet IDs
+                        // Example: /adopt/apply/?pets=id1,id2,id3
+                        window.location.href = `/adopt/apply/?pets=${selectedPetIds.join(',')}`;
+                        // Note: You will need to create or update the view and URL for /adopt/apply/
+                        // to handle these pet IDs and display the form appropriately.
+                    } else {
+                        alert('โปรดเลือกสัตว์เลี้ยงที่ต้องการรับเลี้ยงอย่างน้อยหนึ่งตัว');
+                    }
+                });
+            }
+
+
+            // Function to get CSRF token
+             function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+{% endblock %}
