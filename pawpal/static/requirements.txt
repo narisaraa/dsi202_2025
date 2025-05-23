@@ -1,0 +1,12 @@
+Django>=4.2
+gunicorn
+Pillow
+django-allauth==0.58.0
+requests
+asgiref
+channels
+PyJWT
+daphne
+promptpay
+django-debug-toolbar
+python-dotenv
