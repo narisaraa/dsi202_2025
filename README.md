@@ -268,4 +268,3 @@ docker-compose exec web python manage.py createsuperuser
 ```
 
 ---
-let's know pawpal : https://www.youtube.com/playlist?list=PL305w5FuYK_BZ7wCnSdSgQUFavAXRpn-o
