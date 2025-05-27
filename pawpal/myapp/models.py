@@ -11,7 +11,7 @@ class Pet(models.Model):
     is_adopted = models.BooleanField(default=False)
     PET_TYPE_CHOICES = [
         ('dog', 'Dog'),
-        ('cat', 'Cat'),
+        ('cat', 'Cat'), 
     ]
     GENDER_CHOICES = [
         ('male', 'Male'),
