@@ -9,7 +9,7 @@ from .models import Product
 from django.contrib import admin
 from .models import Pet, PetImage
 # Import ValidationError จาก django.core.exceptions ถ้ายังไม่มี
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError 
 
 #test
 class DonationCaseInline(admin.TabularInline):
